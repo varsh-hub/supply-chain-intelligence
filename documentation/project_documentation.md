@@ -182,3 +182,91 @@ Using such variables to predict late delivery could introduce **target leakage**
 Therefore, the predictive-model feature set will be designed around information that would realistically be available before or during the shipping process.
 
 The EDA results will be used to guide feature selection, anomaly detection, predictive modelling, and the subsequent supply-chain risk engine.
+
+
+## Predictive Feature Engineering and Target Design
+
+After completing exploratory data analysis, the next stage was to prepare the dataset specifically for machine-learning prediction.
+
+The objective of the predictive model is to estimate whether an order is likely to experience late delivery.
+
+### Target Variable
+
+The target variable selected for the classification model is:
+
+`Late_delivery_risk`
+
+The target contains two classes:
+
+- `0` — No late-delivery risk
+- `1` — Late-delivery risk
+
+The dataset contains 180,519 records, with the following target distribution:
+
+| Target | Records | Percentage |
+|---|---:|---:|
+| 0 | 81,542 | 45.17% |
+| 1 | 98,977 | 54.83% |
+
+The target distribution is reasonably balanced, so no major class-imbalance correction is required at this stage.
+
+### Feature Selection
+
+Potential predictive variables were selected from the processed dataset, including order, product, customer, geographical, financial, and shipping information.
+
+Examples include:
+
+- Shipping mode
+- Scheduled shipping duration
+- Order quantity
+- Product price
+- Sales
+- Customer segment
+- Market
+- Country
+- Region
+- Product category
+- Department
+- Order type
+- Product status
+
+### Prevention of Data Leakage
+
+Special attention was given to preventing target leakage.
+
+Several columns describe the delivery outcome itself and therefore were excluded from the predictive feature set:
+
+- `Days for shipping (real)`
+- `delivery_delay_days`
+- `Delivery Status`
+- `shipping date (DateOrders)`
+- `order_to_shipping_days`
+- `Late_delivery_risk`
+
+These variables may contain information that would only become available after the delivery process has occurred. Using them as predictive inputs could produce unrealistically high model performance.
+
+Therefore, the model will be trained using information that is more representative of what would be available when assessing an order's delivery risk.
+
+### Date Feature Engineering
+
+The original order-date column was transformed into separate calendar features:
+
+- `order_year`
+- `order_month`
+- `order_day_of_week`
+- `order_hour`
+
+The original `order date (DateOrders)` column was then removed from the model input.
+
+The `Order Id` column was also excluded because it is an identifier rather than a meaningful business feature.
+
+### Result
+
+The resulting feature-engineering pipeline separates the dataset into:
+
+- **X** — predictive input features
+- **y** — late-delivery-risk target
+
+The resulting feature set contains no missing values and is ready for categorical encoding, train/test splitting, and machine-learning model development.
+
+This stage establishes a leakage-aware foundation for the predictive component of the Supply Chain Risk & Disruption Intelligence System.
