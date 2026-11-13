@@ -521,3 +521,184 @@ Machine Learning Model → Risk Probability → Risk Engine → Risk Level
 In later stages, the Risk Engine will be extended to incorporate additional risk signals, particularly anomaly-detection results from the disruption-detection module.
 
 This will allow the final system to combine predictive risk with unusual or abnormal supply-chain behavior rather than relying exclusively on a single machine-learning probability.
+
+## Anomaly and Disruption Detection
+
+After developing the supervised machine-learning risk model, an unsupervised anomaly-detection component was implemented to identify unusual supply-chain order patterns.
+
+### Objective
+
+The objective of this module is different from the late-delivery prediction model.
+
+The supervised model answers:
+
+> Is this order likely to experience late delivery?
+
+The anomaly detector answers:
+
+> Does this order exhibit an unusual pattern compared with the normal observations in the dataset?
+
+This provides an additional source of risk intelligence.
+
+### Isolation Forest
+
+The anomaly-detection algorithm selected for this stage was **Isolation Forest**.
+
+Isolation Forest is an unsupervised machine-learning algorithm designed to identify observations that are significantly different from the majority of the dataset.
+
+Unlike the supervised late-delivery model, Isolation Forest does not require a target variable indicating whether an observation is anomalous.
+
+### Anomaly Features
+
+The anomaly detector uses numerical order and business characteristics including:
+
+- Scheduled shipping duration
+- Benefit per order
+- Sales per customer
+- Order item quantity
+- Sales
+- Order item total
+- Order profit per order
+- Order item product price
+- Order item profit ratio
+- Product price
+- Order hour
+- Order day of week
+- Order month
+
+Delivery-outcome variables such as actual shipping duration, delivery status, and late-delivery risk were excluded from the anomaly feature set.
+
+This prevents the anomaly detector from simply rediscovering the target outcome.
+
+### Configuration
+
+The Isolation Forest model was configured with:
+
+- 100 trees
+- Random state = 42
+- Contamination = 5%
+
+The contamination parameter indicates that approximately 5% of observations are expected to represent unusual patterns.
+
+### Results
+
+The detector processed all **180,519 records**.
+
+| Classification | Records | Percentage |
+|---|---:|---:|
+| Normal | 171,493 | 95.00% |
+| Anomaly | 9,026 | 5.00% |
+
+The observed anomaly percentage matches the configured contamination level.
+
+### Interpretation
+
+The highest-scoring anomalous observations contained unusual combinations of business variables, including large negative profit values and unusually large differences between sales and profit.
+
+These observations demonstrate that the anomaly detector can identify unusual business patterns that may require further investigation.
+
+However, an anomaly should not automatically be interpreted as a confirmed supply-chain disruption. The current dataset does not contain a direct disruption-event label, such as a port closure, transportation strike, weather event, or supplier failure.
+
+Therefore, the module is described as an **anomaly-detection component for unusual supply-chain/order behavior**.
+
+### Integration with the Risk Engine
+
+The anomaly detector will later be integrated with the predictive risk model.
+
+The planned architecture is:
+
+Machine-Learning Risk Probability  
++  
+Anomaly Score  
+↓  
+Risk Engine  
+↓  
+Final Supply-Chain Risk Level
+
+This combination allows the system to consider both predicted delivery risk and unusual operational patterns.
+
+## Recommendation Engine
+
+After developing the predictive risk model and anomaly-detection module, a recommendation engine was implemented to convert detected risk into actionable business guidance.
+
+### Objective
+
+The purpose of the Recommendation Engine is to answer:
+
+> What action should be considered when a supply-chain order is identified as risky or unusual?
+
+Rather than generating recommendations using another opaque machine-learning model, the system uses explainable business rules based on the outputs of the predictive and anomaly-detection components.
+
+### Recommendation Inputs
+
+The recommendation engine considers:
+
+- Risk level
+- Late-delivery probability
+- Anomaly status
+- Shipping mode
+- Scheduled shipping duration
+- Order quantity
+- Order profitability
+
+### Example Recommendation Logic
+
+If an order has HIGH risk, the system recommends prioritizing the order for logistics review.
+
+If an order is classified as anomalous, the system recommends investigating the unusual order pattern.
+
+If the shipping mode is associated with elevated observed late-delivery risk in the dataset, the system recommends additional monitoring.
+
+If the scheduled shipping window is short, proactive shipment monitoring may be recommended.
+
+If the order quantity is relatively high, fulfillment capacity can be reviewed.
+
+If the order has negative profitability, the system can recommend reviewing fulfillment and shipping costs.
+
+### Explainability
+
+The recommendation engine uses explicit rules rather than an additional black-box prediction model.
+
+This provides a clear connection between the detected risk and the recommended action.
+
+For example:
+
+```text
+High ML Risk
+      +
+Anomalous Pattern
+      +
+First Class Shipping
+      ↓
+Prioritize Logistics Review
+```
+
+This makes the recommendations easier for supply-chain users to understand and provides an interpretable decision-support mechanism.
+
+### Important Limitation
+
+The recommendations represent decision-support suggestions rather than guaranteed operational actions.
+
+The current dataset does not contain detailed real-time logistics information, supplier capacity, inventory availability, weather conditions, transportation incidents, or confirmed disruption events.
+
+Therefore, recommendations are based on patterns available within the dataset and should be interpreted as guidance for further investigation.
+
+### Role in the Overall System
+
+The Recommendation Engine completes the decision-support chain:
+
+```text
+Supply Chain Data
+       ↓
+Machine Learning
+       ↓
+Risk Probability
+       ↓
+Risk Engine
+       ↓
+Risk Level
+       ↓
+Recommendation
+```
+
+The next stage will expose these results through the Streamlit dashboard.
