@@ -452,3 +452,72 @@ The objective is to identify a threshold that provides an appropriate balance be
 Random Forest was selected as the primary machine-learning model based on its superior performance across all evaluated metrics.
 
 The next stage will focus on probability calibration, threshold analysis, and selection of appropriate risk levels for the final risk engine.
+
+## Risk Engine and Risk Threshold Design
+
+After developing and evaluating the machine-learning models, a risk-engine component was implemented to convert model prediction probabilities into understandable supply-chain risk levels.
+
+### Probability-Based Risk Assessment
+
+The Random Forest model produces a probability representing the likelihood that an order belongs to the late-delivery-risk class.
+
+Instead of displaying only a binary prediction, the Risk Engine categorizes the probability into three business-oriented risk levels:
+
+| Probability | Risk Level |
+|---|---|
+| Below 0.40 | LOW |
+| 0.40 to below 0.70 | MEDIUM |
+| 0.70 or higher | HIGH |
+
+This allows the system to distinguish between relatively safe orders, orders requiring monitoring, and orders requiring immediate attention.
+
+### Threshold Analysis
+
+Several classification thresholds were evaluated using the test dataset.
+
+| Threshold | Precision | Recall | F1 Score |
+|---:|---:|---:|---:|
+| 0.30 | 65.39% | 94.64% | 77.34% |
+| 0.35 | 70.42% | 89.73% | 78.91% |
+| **0.40** | **75.60%** | **83.39%** | **79.30%** |
+| 0.45 | 80.80% | 76.96% | 78.83% |
+| 0.50 | 84.75% | 70.82% | 77.16% |
+| 0.60 | 89.75% | 62.67% | 73.81% |
+| 0.65 | 91.43% | 59.63% | 72.18% |
+| 0.70 | 92.94% | 56.93% | 70.61% |
+
+The 0.40 threshold produced the highest F1 score among the evaluated thresholds while maintaining a relatively high recall.
+
+This threshold was therefore selected as the operating threshold for identifying positive late-delivery risk.
+
+### Why Recall Is Important
+
+In a supply-chain risk system, false negatives can be particularly important because a genuinely risky order that is classified as safe may not receive appropriate attention.
+
+The selected 0.40 threshold provides a balance between identifying risky orders and avoiding excessive false alarms.
+
+### Three-Level Business Risk
+
+The binary machine-learning prediction was extended into three business risk levels:
+
+- **LOW:** prediction probability below 0.40
+- **MEDIUM:** prediction probability from 0.40 to below 0.70
+- **HIGH:** prediction probability of 0.70 or higher
+
+The test dataset was divided into:
+
+- 14,268 LOW-risk records
+- 9,710 MEDIUM-risk records
+- 12,126 HIGH-risk records
+
+### Architectural Role
+
+The Risk Engine provides an abstraction layer between the machine-learning model and the final application.
+
+The current flow is:
+
+Machine Learning Model → Risk Probability → Risk Engine → Risk Level
+
+In later stages, the Risk Engine will be extended to incorporate additional risk signals, particularly anomaly-detection results from the disruption-detection module.
+
+This will allow the final system to combine predictive risk with unusual or abnormal supply-chain behavior rather than relying exclusively on a single machine-learning probability.
