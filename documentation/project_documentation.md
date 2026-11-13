@@ -270,3 +270,60 @@ The resulting feature-engineering pipeline separates the dataset into:
 The resulting feature set contains no missing values and is ready for categorical encoding, train/test splitting, and machine-learning model development.
 
 This stage establishes a leakage-aware foundation for the predictive component of the Supply Chain Risk & Disruption Intelligence System.
+
+
+## Machine Learning Baseline Model
+
+After preparing the predictive features and target variable, a first machine-learning classification model was developed to predict late-delivery risk.
+
+### Train/Test Split
+
+The dataset was divided into training and testing subsets using an 80/20 split.
+
+- Training records: **144,415**
+- Testing records: **36,104**
+
+Stratified sampling was used so that the distribution of the two target classes remained approximately consistent between the training and testing datasets.
+
+### Categorical Feature Encoding
+
+The dataset contains both numerical and categorical variables.
+
+Categorical variables such as shipping mode, market, product category, customer segment, and geographical fields were converted into machine-readable numerical representations using one-hot encoding.
+
+A preprocessing pipeline was used so that feature transformation and model training were handled consistently.
+
+### Baseline Model
+
+A **Random Forest Classifier** was selected as the first baseline machine-learning algorithm.
+
+The model was configured with 100 decision trees and a fixed random state to make the experiment reproducible.
+
+Random Forest was selected because it can capture nonlinear relationships between multiple supply-chain variables and can work effectively with a mixture of numerical and encoded categorical features.
+
+### Baseline Model Performance
+
+The model was evaluated using the unseen test dataset.
+
+| Metric | Result |
+|---|---:|
+| Accuracy | 76.79% |
+| Precision | 85.34% |
+| Recall | 69.64% |
+| F1 Score | 76.70% |
+
+The model achieved an overall accuracy of approximately **76.79%**.
+
+The precision for the late-delivery-risk class was approximately **85.34%**, indicating that when the model predicts an order as high late-delivery risk, the prediction is correct relatively often.
+
+The recall for the late-delivery-risk class was approximately **69.64%**, meaning that the model successfully identified approximately 70% of the orders that actually belonged to the late-risk class.
+
+The F1 score of **76.70%** provides a balanced measure of precision and recall.
+
+### Baseline Model Interpretation
+
+The results indicate that the selected supply-chain features contain meaningful information for predicting late-delivery risk.
+
+However, this model is considered a **baseline model** rather than the final predictive model. Further analysis is required to understand feature importance, classification errors, and whether model performance can be improved through parameter tuning and alternative algorithms.
+
+The next stage will therefore focus on model evaluation, feature importance, confusion-matrix analysis, and model improvement.
