@@ -5,6 +5,7 @@ import plotly.express as px
 import joblib
 
 from src.feature_engineering import load_data, prepare_features
+from src.recommendations import generate_recommendation
 
 
 # ============================================================
@@ -28,12 +29,12 @@ st.set_page_config(
 
 
 # ============================================================
-# LOAD DATA
+# LOAD ANOMALY DATA
 # ============================================================
 
 @st.cache_data
 def load_anomaly_data():
-    """Load saved anomaly detection results."""
+    """Load saved anomaly-detection results."""
     return pd.read_csv(ANOMALY_DATA_PATH)
 
 
@@ -46,6 +47,10 @@ def load_model():
     """Load the trained Random Forest model."""
     return joblib.load(MODEL_PATH)
 
+
+# ============================================================
+# LOAD APPLICATION DATA
+# ============================================================
 
 df = load_data()
 model = load_model()
@@ -85,6 +90,7 @@ late_risk_percentage = (
 total_products = (
     df["Product Card Id"].nunique()
 )
+
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -132,8 +138,11 @@ st.markdown(
 )
 
 
+# Prepare features using the same feature-engineering logic
 X, y = prepare_features(df)
 
+
+# Generate ML risk probabilities
 risk_probabilities = (
     model.predict_proba(X)[:, 1]
 )
@@ -161,6 +170,7 @@ risk_levels = [
 ]
 
 
+# Add predictions to a copy of the dataframe
 prediction_df = df.copy()
 
 prediction_df[
@@ -373,12 +383,143 @@ st.dataframe(
 
 
 # ============================================================
+# RECOMMENDATION ENGINE
+# ============================================================
+
+st.subheader(
+    "💡 Risk-Based Recommendations"
+)
+
+st.markdown(
+    """
+    The recommendation engine converts detected risk and
+    operational signals into explainable decision-support guidance.
+    """
+)
+
+
+# Select medium- and high-risk orders
+recommendation_orders = (
+    prediction_df[
+        prediction_df["ML Risk Level"].isin(
+            ["HIGH", "MEDIUM"]
+        )
+    ]
+    .head(20)
+    .copy()
+)
+
+
+if len(recommendation_orders) > 0:
+
+    selected_order = st.selectbox(
+        "Select an order to view recommendations:",
+        recommendation_orders["Order Id"].tolist()
+    )
+
+    selected_row = recommendation_orders[
+        recommendation_orders["Order Id"] == selected_order
+    ].iloc[0]
+
+
+    # --------------------------------------------------------
+    # Match anomaly result with selected order
+    # --------------------------------------------------------
+
+    selected_index = selected_row.name
+
+    selected_anomaly = anomaly_df.iloc[
+        selected_index
+    ]
+
+
+    # --------------------------------------------------------
+    # Generate recommendations
+    # --------------------------------------------------------
+
+    recommendations = generate_recommendation(
+        risk_level=selected_row[
+            "ML Risk Level"
+        ],
+
+        risk_probability=selected_row[
+            "ML Risk Probability"
+        ],
+
+        anomaly_label=int(
+            selected_anomaly[
+                "anomaly_label"
+            ]
+        ),
+
+        shipping_mode=selected_row[
+            "Shipping Mode"
+        ],
+
+        scheduled_shipping_days=selected_row[
+            "Days for shipment (scheduled)"
+        ],
+
+        order_quantity=selected_row[
+            "Order Item Quantity"
+        ],
+
+        order_profit=selected_row[
+            "Order Profit Per Order"
+        ]
+    )
+
+
+    # --------------------------------------------------------
+    # Selected order information
+    # --------------------------------------------------------
+
+    st.markdown(
+        f"""
+        **Order ID:** {selected_order}
+
+        **ML Risk Probability:** \
+        {selected_row["ML Risk Probability"]:.2f}
+
+        **Risk Level:** \
+        {selected_row["ML Risk Level"]}
+
+        **Anomaly Status:** \
+        {"Anomalous" if selected_anomaly["anomaly_label"] == 1 else "Normal"}
+        """
+    )
+
+
+    # --------------------------------------------------------
+    # Recommended actions
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### Recommended Actions"
+    )
+
+
+    for recommendation in recommendations:
+
+        st.info(
+            f"💡 {recommendation}"
+        )
+
+else:
+
+    st.info(
+        "No medium- or high-risk orders are currently available."
+    )
+
+
+# ============================================================
 # HISTORICAL DELIVERY RISK
 # ============================================================
 
 st.subheader(
     "Historical Delivery Risk"
 )
+
 
 risk_counts = (
     df["Late_delivery_risk"]
@@ -428,12 +569,14 @@ shipping_risk = (
     .reset_index()
 )
 
+
 shipping_risk[
     "Risk Percentage"
 ] = (
     shipping_risk[
         "Late_delivery_risk"
-    ] * 100
+    ]
+    * 100
 )
 
 
