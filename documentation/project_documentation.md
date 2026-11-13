@@ -702,3 +702,53 @@ Recommendation
 ```
 
 The next stage will expose these results through the Streamlit dashboard.
+
+## Anomaly Detection Dashboard Integration
+
+The anomaly-detection module was integrated into the Streamlit dashboard to provide visual monitoring of unusual supply-chain order patterns.
+
+The dashboard loads the previously generated anomaly results from:
+
+`data/processed/anomaly_results.csv`
+
+The anomaly results are not recalculated every time the dashboard is opened. Instead, the saved results are loaded into the application, which improves dashboard performance and separates model processing from visualization.
+
+### Dashboard Metrics
+
+The integrated dashboard displays:
+
+- Total number of anomalous orders.
+- Overall anomaly rate.
+- Distribution between normal and anomalous order patterns.
+- A table containing the highest-scoring anomalous observations.
+
+The current anomaly-detection results contain:
+
+| Pattern | Records | Percentage |
+|---|---:|---:|
+| Normal | 171,493 | 95.00% |
+| Anomaly | 9,026 | 5.00% |
+
+### Interpretation
+
+The dashboard provides an operational view of unusual order behavior identified by the Isolation Forest model.
+
+An anomalous record represents an observation whose characteristics differ substantially from the normal patterns identified by the model.
+
+An anomaly should not automatically be interpreted as a confirmed supply-chain disruption because the current dataset does not contain direct disruption-event information such as transportation strikes, port closures, severe weather events, or supplier failures.
+
+Therefore, the dashboard uses anomaly detection as an additional **risk-intelligence signal** that can be investigated alongside the machine-learning delivery-risk prediction.
+
+### Role in the System
+
+The dashboard now combines two complementary machine-learning outputs:
+
+**Supervised Prediction**
+
+Predicts the probability of late-delivery risk.
+
+**Unsupervised Detection**
+
+Identifies unusual order and business patterns.
+
+Together, these components provide a broader view of supply-chain risk and form the foundation for the final recommendation and decision-support layer.
