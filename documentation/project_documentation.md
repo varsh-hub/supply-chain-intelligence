@@ -327,3 +327,72 @@ The results indicate that the selected supply-chain features contain meaningful 
 However, this model is considered a **baseline model** rather than the final predictive model. Further analysis is required to understand feature importance, classification errors, and whether model performance can be improved through parameter tuning and alternative algorithms.
 
 The next stage will therefore focus on model evaluation, feature importance, confusion-matrix analysis, and model improvement.
+
+## Model Evaluation and Feature Importance
+
+After training the baseline Random Forest classifier, a detailed evaluation was performed to understand the model's classification performance and identify the features that contributed most strongly to its predictions.
+
+### Confusion Matrix
+
+The model produced the following confusion matrix on the test dataset:
+
+| | Predicted Not Late | Predicted Late Risk |
+|---|---:|---:|
+| **Actual Not Late** | 13,940 | 2,368 |
+| **Actual Late Risk** | 6,010 | 13,786 |
+
+The model correctly identified 13,940 non-late-risk orders and 13,786 late-risk orders.
+
+There were 2,368 false-positive predictions and 6,010 false-negative predictions.
+
+The false-negative cases are particularly important for the proposed supply-chain risk system because they represent orders that were actually associated with late-delivery risk but were not identified by the model.
+
+### Model Performance
+
+The baseline Random Forest achieved:
+
+- Accuracy: **76.79%**
+- Precision: **85.34%**
+- Recall: **69.64%**
+- F1 Score: **76.70%**
+
+The relatively high precision indicates that the model's late-risk predictions are generally reliable. However, the recall of approximately 69.64% shows that there is still room to improve the model's ability to identify all late-risk orders.
+
+### Feature Importance
+
+Random Forest feature importance was analyzed to identify the variables that contributed most strongly to the model.
+
+The highest-ranked features included:
+
+| Feature | Importance |
+|---|---:|
+| Days for shipment (scheduled) | 9.16% |
+| Shipping Mode — Standard Class | 5.71% |
+| Order Hour | 4.74% |
+| Shipping Mode — First Class | 3.79% |
+| Order Profit Per Order | 3.52% |
+| Benefit per Order | 3.52% |
+| Order Item Profit Ratio | 3.24% |
+| Sales per Customer | 3.21% |
+| Order Item Total | 3.20% |
+| Order Day of Week | 2.43% |
+
+The results indicate that scheduled shipping duration and shipping mode are among the most influential variables for predicting late-delivery risk.
+
+Temporal features such as order hour, day of week, and month also contributed to the model.
+
+### Business Interpretation
+
+The feature-importance analysis provides useful evidence for the proposed Supply Chain Risk & Disruption Intelligence System.
+
+The model suggests that shipping configuration and order timing contain meaningful information about delivery risk. These variables can therefore be incorporated into the later risk-scoring and recommendation components of the system.
+
+However, feature importance from a Random Forest represents model-specific predictive contribution and should not automatically be interpreted as proof of direct causation.
+
+### Conclusion
+
+The baseline model provides a useful starting point for the predictive component of the project.
+
+The evaluation also revealed an important opportunity for improvement: reducing the number of late-risk orders that are incorrectly classified as safe.
+
+Therefore, the next stage will investigate model improvement and threshold selection, with particular attention to improving recall while maintaining acceptable precision.
