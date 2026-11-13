@@ -396,3 +396,59 @@ The baseline model provides a useful starting point for the predictive component
 The evaluation also revealed an important opportunity for improvement: reducing the number of late-risk orders that are incorrectly classified as safe.
 
 Therefore, the next stage will investigate model improvement and threshold selection, with particular attention to improving recall while maintaining acceptable precision.
+
+## Model Comparison and Selection
+
+After evaluating the baseline Random Forest model, a second classification algorithm was implemented to determine whether an alternative model could provide better predictive performance.
+
+Two models were compared:
+
+1. Random Forest Classifier
+2. Logistic Regression
+
+Both models used the same training and testing datasets and the same leakage-aware feature-engineering process.
+
+### Model Comparison
+
+| Model | Accuracy | Precision | Recall | F1 Score | ROC AUC |
+|---|---:|---:|---:|---:|---:|
+| Random Forest | 76.79% | 85.34% | 69.64% | 76.70% | 86.12% |
+| Logistic Regression | 71.50% | 79.37% | 64.89% | 71.41% | 78.08% |
+
+### Model Selection
+
+The Random Forest classifier outperformed Logistic Regression across all evaluated metrics.
+
+The Random Forest achieved an accuracy of 76.79%, compared with 71.50% for Logistic Regression.
+
+It also achieved higher precision, recall, F1 score, and ROC AUC.
+
+The ROC AUC of **0.8612** indicates that the Random Forest provides strong separation between late-delivery-risk and non-risk orders compared with the Logistic Regression model.
+
+Based on this comparison, **Random Forest was selected as the primary predictive model** for the Supply Chain Risk & Disruption Intelligence System.
+
+### Probability-Based Prediction
+
+Instead of relying only on a binary prediction, the selected Random Forest model can generate a probability representing the estimated likelihood of late-delivery risk.
+
+For example, a model may produce probabilities such as:
+
+- 0.15 — relatively low risk
+- 0.48 — moderate risk
+- 0.82 — high risk
+
+These probabilities will later be used by the risk engine to classify orders into meaningful risk levels.
+
+### Classification Threshold
+
+The default classification threshold is 0.50. However, the final system should not necessarily use this threshold without further analysis.
+
+Because missing a genuinely risky order can be costly in supply-chain operations, the trade-off between precision and recall will be evaluated using different probability thresholds.
+
+The objective is to identify a threshold that provides an appropriate balance between detecting risky orders and avoiding excessive false alerts.
+
+### Conclusion
+
+Random Forest was selected as the primary machine-learning model based on its superior performance across all evaluated metrics.
+
+The next stage will focus on probability calibration, threshold analysis, and selection of appropriate risk levels for the final risk engine.
