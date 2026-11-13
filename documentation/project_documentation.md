@@ -78,3 +78,107 @@ The preprocessing process included the following steps:
 After preprocessing, the resulting dataset contained 180,519 records and 34 columns. The processed dataset contained no missing values and no duplicate records.
 
 The processed dataset will be used as the input for exploratory analysis, feature engineering, anomaly detection, and machine-learning model development.
+
+## Exploratory Data Analysis
+
+After preprocessing the supply-chain dataset, exploratory data analysis (EDA) was performed to understand delivery-risk patterns and identify important relationships within the dataset.
+
+The EDA was performed using Pandas for statistical analysis and Plotly for interactive visualizations.
+
+### Dataset Overview
+
+The processed dataset contains **180,519 records and 34 columns**.
+
+The analysis found:
+
+- 98,977 orders classified as late-delivery risk.
+- 81,542 orders not classified as late-delivery risk.
+- Approximately **54.83%** of the orders were associated with late-delivery risk.
+- Approximately **45.17%** of the orders were not associated with late-delivery risk.
+
+### Delivery Delay Analysis
+
+A delivery-delay feature was previously created by comparing actual shipping duration with scheduled shipping duration.
+
+The average delivery delay was approximately **0.57 days**, while the median delay was **1 day**.
+
+The observed delay ranged from **-2 days to +4 days**. Negative values indicate shipments that were completed faster than the scheduled duration, while positive values indicate delays.
+
+The distribution showed that a large number of orders experienced a delay of approximately one day.
+
+### Shipping Mode Analysis
+
+Late-delivery risk was analyzed across different shipping modes.
+
+The results were:
+
+| Shipping Mode | Late Delivery Risk |
+|---|---:|
+| First Class | 95.32% |
+| Second Class | 76.63% |
+| Same Day | 45.74% |
+| Standard Class | 38.07% |
+
+The analysis indicates a strong relationship between shipping mode and late-delivery risk in the dataset. First Class and Second Class shipments had substantially higher observed late-delivery risk than Same Day and Standard Class shipments.
+
+This variable is therefore considered an important candidate for further investigation and machine-learning feature engineering.
+
+### Market Analysis
+
+Late-delivery risk was also compared across different markets.
+
+The observed risk percentages were relatively similar:
+
+- Europe: 55.21%
+- Pacific Asia: 55.05%
+- USCA: 54.80%
+- Africa: 54.59%
+- LATAM: 54.36%
+
+This indicates that market-level differences in late-delivery risk are smaller than the differences observed between shipping modes.
+
+### Product Category Analysis
+
+Product categories were analyzed to identify categories with relatively high observed delivery risk.
+
+The ten highest-risk categories included:
+
+| Category | Late Delivery Risk |
+|---|---:|
+| Golf Bags & Carts | 68.85% |
+| Lacrosse | 60.06% |
+| Pet Supplies | 58.94% |
+| Cameras | 58.11% |
+| Strength Training | 57.66% |
+| As Seen on TV! | 57.35% |
+| Music | 57.14% |
+| Accessories | 56.97% |
+| Fitness Accessories | 56.96% |
+| Books | 56.54% |
+
+These results show that product category may also contain useful information for understanding delivery-risk patterns.
+
+### EDA Visualizations
+
+Three primary visualizations were generated:
+
+1. **Late Delivery Risk Distribution**  
+   This chart compares the number of orders classified as late-delivery risk and non-risk.
+
+2. **Distribution of Delivery Delay**  
+   This histogram shows the distribution of delivery delays across orders.
+
+3. **Late Delivery Risk by Shipping Mode**  
+   This chart compares the percentage of late-delivery risk across different shipping modes.
+
+### Important Consideration for Machine Learning
+
+The EDA identified several variables that describe the delivery outcome itself, such as actual shipping duration and calculated delivery delay.
+
+These variables are useful for historical analysis, but they should not automatically be used as predictive-model inputs because they may only become available after the delivery process has already occurred.
+
+Using such variables to predict late delivery could introduce **target leakage**, resulting in an unrealistically accurate machine-learning model.
+
+Therefore, the predictive-model feature set will be designed around information that would realistically be available before or during the shipping process.
+
+The EDA results will be used to guide feature selection, anomaly detection, predictive modelling, and the subsequent supply-chain risk engine.
